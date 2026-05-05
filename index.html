@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🎵 Ask Music</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --preto:#0a0a0f;
+  --grafite:#13131a;
+  --card:#1c1c26;
+  --card2:#22222e;
+  --borda:#2e2e3e;
+  --acento:#f5a623;
+  --acento2:#e8532a;
+  --verde:#22c55e;
+  --vermelho:#ef4444;
+  --azul:#3b82f6;
+  --roxo:#8b5cf6;
+  --texto:#e8e8f0;
+  --muted:#6b6b80;
+  --branco:#ffffff;
+  --grad:linear-gradient(135deg,#f5a623,#e8532a);
+}
+html,body{height:100%;background:var(--preto);color:var(--texto);font-family:'DM Sans',sans-serif;overflow:hidden;}
+
+/* ── TELAS ─────────────────────────────────────────────── */
+.tela{display:none;height:100vh;overflow:hidden;flex-direction:column;}
+.tela.ativa{display:flex;}
+
+/* ── LOGIN ─────────────────────────────────────────────── */
+#telaLogin{background:var(--preto);align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.login-bg{position:absolute;inset:0;background:
+  radial-gradient(ellipse 80% 60% at 20% 10%, rgba(245,166,35,0.12) 0%, transparent 60%),
+  radial-gradient(ellipse 60% 80% at 80% 90%, rgba(232,83,42,0.10) 0%, transparent 60%);
+}
+.login-noise{position:absolute;inset:0;opacity:0.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+.login-box{position:relative;z-index:1;width:100%;max-width:420px;padding:40px 32px;animation:fadeUp .5s ease;}
+.login-logo{text-align:center;margin-bottom:40px;}
+.login-logo .icon{width:72px;height:72px;background:var(--grad);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px;box-shadow:0 12px 40px rgba(245,166,35,0.3);}
+.login-logo h1{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:3px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.login-logo p{color:var(--muted);font-size:14px;margin-top:4px;}
+.tipo-tabs{display:flex;background:var(--card);border-radius:14px;padding:4px;margin-bottom:24px;gap:4px;}
+.tipo-tab{flex:1;padding:10px;border:none;background:transparent;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s;}
+.tipo-tab.ativo{background:var(--grad);color:var(--branco);box-shadow:0 4px 14px rgba(245,166,35,0.3);}
+.campo{margin-bottom:16px;}
+.campo label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;}
+.campo input,.campo select,.campo textarea{width:100%;background:var(--card);border:1.5px solid var(--borda);border-radius:12px;padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--texto);outline:none;transition:border-color .2s;}
+.campo input:focus,.campo select:focus,.campo textarea:focus{border-color:var(--acento);}
+.campo select option{background:var(--card);}
+.campo textarea{resize:none;min-height:80px;}
+.btn-primario{width:100%;background:var(--grad);color:var(--branco);border:none;border-radius:14px;padding:15px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(245,166,35,0.25);transition:transform .15s,box-shadow .15s;letter-spacing:.5px;}
+.btn-primario:active{transform:scale(0.98);}
+.btn-sec{background:var(--card2);color:var(--texto);border:1.5px solid var(--borda);border-radius:12px;padding:11px 18px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-sec:hover{border-color:var(--acento);color:var(--acento);}
+.link-auth{text-align:center;margin-top:18px;font-size:13px;color:var(--muted);}
+.link-auth span{color:var(--acento);cursor:pointer;font-weight:600;}
+.msg-erro{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:none;}
+.msg-erro.vis{display:block;}
+
+/* ── LAYOUT PRINCIPAL ──────────────────────────────────── */
+#telaApp{background:var(--preto);}
+.app-header{background:var(--grafite);border-bottom:1px solid var(--borda);padding:14px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.app-header .logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;flex:1;}
+.app-header .user-info{font-size:12px;color:var(--muted);text-align:right;}
+.app-header .user-info strong{display:block;color:var(--texto);font-size:13px;}
+.btn-logout{background:transparent;border:1.5px solid var(--borda);border-radius:10px;padding:7px 12px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-logout:hover{border-color:var(--vermelho);color:var(--vermelho);}
+.app-body{flex:1;overflow-y:auto;padding:16px;}
+
+/* ── BOTTOM NAV ────────────────────────────────────────── */
+.bottom-nav{background:var(--grafite);border-top:1px solid var(--borda);display:flex;flex-shrink:0;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:color .2s;}
+.nav-item.ativo{color:var(--acento);}
+.nav-item .nav-icon{font-size:20px;}
+
+/* ── CARDS BANDA ───────────────────────────────────────── */
+.secao-titulo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--texto);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.secao-titulo .badge{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;background:var(--grad);color:var(--branco);padding:3px 10px;border-radius:20px;letter-spacing:.5px;}
+.banda-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
+.banda-card{background:var(--card);border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s;border:1.5px solid var(--borda);}
+.banda-card:active{transform:scale(0.97);}
+.banda-card:hover{box-shadow:0 8px 24px rgba(245,166,35,0.15);border-color:rgba(245,166,35,0.3);}
+.banda-foto{width:100%;aspect-ratio:1;object-fit:cover;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--muted);}
+.banda-foto img{width:100%;height:100%;object-fit:cover;}
+.banda-info{padding:10px 12px;}
+.banda-nome{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.banda-cidade{font-size:11px;color:var(--muted);margin-top:2px;}
+.banda-genero{font-size:11px;color:var(--acento);margin-top:4px;font-weight:600;}
+
+/* ── FILTRO CIDADE ─────────────────────────────────────── */
+.filtro-bar{background:var(--card);border-radius:14px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;border:1.5px solid var(--borda);}
+.filtro-bar .icon{font-size:18px;}
+.filtro-bar select{flex:1;background:transparent;border:none;color:var(--texto);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;outline:none;}
+
+/* ── MODAL / OVERLAY ───────────────────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:100;display:none;align-items:flex-end;justify-content:center;}
+.overlay.vis{display:flex;}
+.modal{background:var(--grafite);width:100%;max-width:600px;border-radius:24px 24px 0 0;padding:0 0 32px;max-height:92vh;overflow-y:auto;animation:slideUp .3s cubic-bezier(.34,1.56,.64,1);}
+.modal-handle{width:40px;height:4px;background:var(--borda);border-radius:2px;margin:12px auto 0;}
+.modal-header{padding:20px 20px 16px;border-bottom:1px solid var(--borda);display:flex;align-items:center;gap:12px;}
+.modal-header h2{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;flex:1;}
+.modal-body{padding:20px;}
+.modal-foto{width:100%;height:180px;object-fit:cover;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:60px;}
+.modal-foto img{width:100%;height:100%;object-fit:cover;}
+
+/* ── AGENDA CARDS ──────────────────────────────────────── */
+.agenda-item{background:var(--card);border-radius:14px;padding:14px 16px;margin-bottom:10px;cursor:pointer;border:1.5px solid var(--borda);transition:all .2s;}
+.agenda-item:hover,.agenda-item.sel{border-color:var(--acento);background:rgba(245,166,35,0.06);}
+.agenda-data{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--acento);}
+.agenda-local{font-size:14px;color:var(--texto);margin-top:2px;font-weight:600;}
+.agenda-hora{font-size:12px;color:var(--muted);margin-top:3px;font-family:'Space Mono',monospace;}
+.agenda-slots{font-size:12px;margin-top:6px;display:flex;align-items:center;gap:6px;}
+.slot-badge{background:rgba(34,197,94,.15);color:var(--verde);border-radius:6px;padding:2px 8px;font-weight:700;font-size:11px;}
+.slot-badge.cheio{background:rgba(239,68,68,.15);color:var(--vermelho);}
+
+/* ── MÚSICAS ───────────────────────────────────────────── */
+.musica-item{background:var(--card);border-radius:12px;padding:13px 15px;margin-bottom:8px;display:flex;align-items:center;gap:12px;border:1.5px solid transparent;cursor:pointer;transition:all .2s;}
+.musica-item.sel{border-color:var(--acento);background:rgba(245,166,35,0.06);}
+.musica-item.sel .musica-check{background:var(--grad);border-color:var(--acento);}
+.musica-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--borda);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.musica-check.ok::after{content:'✓';font-size:12px;color:white;font-weight:700;}
+.musica-titulo{font-weight:600;font-size:14px;}
+.musica-artista{font-size:12px;color:var(--muted);}
+.musica-genero{font-size:11px;color:var(--acento);font-weight:600;margin-top:2px;}
+
+/* ── PEDIDO CONFIRM ─────────────────────────────────────── */
+.confirm-box{background:var(--card);border-radius:16px;padding:18px;margin-bottom:16px;}
+.confirm-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--borda);}
+.confirm-row:last-child{border-bottom:none;}
+.confirm-label{font-size:13px;color:var(--muted);}
+.confirm-val{font-size:14px;font-weight:600;}
+.valor-total{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--acento);text-align:center;margin:16px 0 4px;}
+.valor-label{text-align:center;font-size:12px;color:var(--muted);margin-bottom:20px;}
+
+/* ── GESTÃO BANDA ─────────────────────────────────────── */
+.tab-panel{display:none;}
+.tab-panel.ativo{display:block;}
+.tabs-row{display:flex;gap:6px;margin-bottom:18px;overflow-x:auto;padding-bottom:2px;}
+.tab-btn{padding:8px 16px;border-radius:20px;border:1.5px solid var(--borda);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s;}
+.tab-btn.ativo{background:var(--grad);color:var(--branco);border-color:transparent;}
+.form-card{background:var(--card);border-radius:16px;padding:18px;margin-bottom:14px;border:1.5px solid var(--borda);}
+.form-card h3{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;margin-bottom:14px;color:var(--acento);}
+.musica-list-item{background:var(--card2);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px;border:1px solid var(--borda);}
+.musica-list-info{flex:1;}
+.btn-del{background:rgba(239,68,68,.15);border:none;border-radius:8px;padding:6px 10px;color:var(--vermelho);cursor:pointer;font-size:16px;}
+.agenda-list-item{background:var(--card2);border-radius:12px;padding:13px 15px;margin-bottom:8px;border:1px solid var(--borda);}
+.agenda-list-header{display:flex;justify-content:space-between;align-items:flex-start;}
+
+/* ── PEDIDOS (banda) ────────────────────────────────────── */
+.pedido-card{background:var(--card);border-radius:14px;padding:14px 16px;margin-bottom:10px;border:1.5px solid var(--borda);}
+.pedido-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.pedido-usuario{font-weight:700;font-size:15px;}
+.pedido-hora{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;}
+.status-badge{border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;letter-spacing:.5px;}
+.status-pendente{background:rgba(245,166,35,.15);color:var(--acento);}
+.status-tocada{background:rgba(34,197,94,.15);color:var(--verde);}
+.status-cancelada{background:rgba(239,68,68,.15);color:var(--vermelho);}
+.pedido-musicas-lista{margin-top:8px;}
+.pedido-musica-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--borda);}
+.pedido-musica-row:last-child{border-bottom:none;}
+.btn-tocar{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:5px 12px;color:var(--verde);font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-tocar:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ── MEU PERFIL ─────────────────────────────────────────── */
+.perfil-foto-preview{width:100px;height:100px;border-radius:20px;background:var(--card2);border:2px dashed var(--borda);display:flex;align-items:center;justify-content:center;font-size:36px;cursor:pointer;overflow:hidden;margin:0 auto 14px;position:relative;}
+.perfil-foto-preview img{width:100%;height:100%;object-fit:cover;}
+.perfil-foto-preview .overlay-edit{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:20px;opacity:0;transition:.2s;}
+.perfil-foto-preview:hover .overlay-edit{opacity:1;}
+.stat-row{display:flex;gap:10px;margin-bottom:16px;}
+.stat-box{flex:1;background:var(--card);border-radius:12px;padding:12px;text-align:center;border:1px solid var(--borda);}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--acento);}
+.stat-label{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* ── MEU STATUS (usuário) ───────────────────────────────── */
+.meu-pedido-card{background:var(--card);border-radius:14px;padding:14px 16px;margin-bottom:10px;border:1.5px solid var(--borda);}
+.meu-pedido-banda{font-weight:700;font-size:15px;margin-bottom:4px;}
+.meu-pedido-show{font-size:12px;color:var(--muted);margin-bottom:10px;}
+.meu-musica-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--borda);}
+.meu-musica-row:last-child{border-bottom:none;}
+
+/* ── EMPTY STATE ─────────────────────────────────────────── */
+.empty{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty .ei{font-size:48px;margin-bottom:12px;}
+.empty p{font-size:14px;line-height:1.6;}
+
+/* ── FOTO UPLOAD ─────────────────────────────────────────── */
+.foto-upload-area{border:2px dashed var(--borda);border-radius:14px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s;background:var(--card2);}
+.foto-upload-area:hover{border-color:var(--acento);}
+.foto-upload-area .foto-preview{width:100%;max-height:200px;object-fit:cover;border-radius:10px;margin-bottom:10px;display:none;}
+
+/* ── ANIMAÇÕES ───────────────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.fade-in{animation:fadeUp .3s ease;}
+
+/* ── LOADING ─────────────────────────────────────────────── */
+.loading{text-align:center;padding:30px;color:var(--muted);}
+.spinner{width:32px;height:32px;border:3px solid var(--borda);border-top-color:var(--acento);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── TOASTS ──────────────────────────────────────────────── */
+#toastArea{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{background:var(--card2);border:1px solid var(--borda);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;animation:fadeUp .3s ease;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.toast.ok{border-color:rgba(34,197,94,.4);color:var(--verde);}
+.toast.err{border-color:rgba(239,68,68,.4);color:var(--vermelho);}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--borda);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<div id="toastArea"></div>
+
+<!-- ═══════════════════════════════════ LOGIN ═══════════════════════════════ -->
+<div class="tela ativa" id="telaLogin">
+  <div class="login-bg"></div>
+  <div class="login-noise"></div>
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="icon">🎵</div>
+      <h1>Ask Music</h1>
+      <p>Peça músicas para sua banda favorita</p>
+    </div>
+    <div class="tipo-tabs">
+      <button class="tipo-tab ativo" onclick="setTipo('usuario')">🎤 Sou Fã</button>
+      <button class="tipo-tab" onclick="setTipo('banda')">🎸 Sou Banda</button>
+    </div>
+    <div id="loginPanel">
+      <div class="msg-erro" id="loginErro"></div>
+      <div class="campo"><label>E-mail</label><input type="email" id="loginEmail" placeholder="seu@email.com"></div>
+      <div class="campo"><label>Senha</label><input type="password" id="loginSenha" placeholder="••••••••"></div>
+      <button class="btn-primario" onclick="fazerLogin()">Entrar →</button>
+      <div class="link-auth">Não tem conta? <span onclick="showCadastro()">Criar agora</span></div>
+    </div>
+    <div id="cadastroPanel" style="display:none">
+      <div class="msg-erro" id="cadErro"></div>
+      <div class="campo"><label>Nome <span id="cadTipoLabel">/ Nome da Banda</span></label><input type="text" id="cadNome" placeholder="Seu nome ou nome da banda"></div>
+      <div class="campo"><label>E-mail</label><input type="email" id="cadEmail" placeholder="seu@email.com"></div>
+      <div class="campo"><label>Senha</label><input type="password" id="cadSenha" placeholder="mínimo 6 caracteres"></div>
+      <div class="campo" id="cadCidadeGrupo"><label>Sua cidade</label>
+        <input type="text" id="cadCidade" placeholder="Ex: São Paulo">
+      </div>
+      <button class="btn-primario" onclick="fazerCadastro()">Criar conta →</button>
+      <div class="link-auth">Já tem conta? <span onclick="showLogin()">Entrar</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ APP PRINCIPAL ═══════════════════════ -->
+<div class="tela" id="telaApp">
+  <div class="app-header">
+    <div class="logo">🎵 Ask Music</div>
+    <div class="user-info">
+      <strong id="headerNome">—</strong>
+      <span id="headerTipo">—</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">Sair</button>
+  </div>
+  <div class="app-body" id="appBody">
+    <div class="loading"><div class="spinner"></div>Carregando...</div>
+  </div>
+  <nav class="bottom-nav" id="bottomNav"></nav>
+</div>
+
+<!-- ═══════════════════════════════════ MODAIS ══════════════════════════════ -->
+
+<!-- Modal: Banda detalhe (usuário vê) -->
+<div class="overlay" id="overlayBanda">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-foto" id="mBandaFoto"></div>
+    <div class="modal-header">
+      <div>
+        <h2 id="mBandaNome"></h2>
+        <div style="font-size:13px;color:var(--muted)" id="mBandaCidade"></div>
+      </div>
+      <button class="btn-sec" onclick="fecharModal('overlayBanda')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="mBandaBio" style="font-size:14px;color:var(--muted);margin-bottom:18px;line-height:1.6;"></p>
+      <div style="display:flex;gap:10px;margin-bottom:20px;">
+        <div style="flex:1;background:var(--card);border-radius:12px;padding:12px;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--acento)" id="mBandaValor"></div>
+          <div style="font-size:11px;color:var(--muted)">por música</div>
+        </div>
+        <div style="flex:1;background:var(--card);border-radius:12px;padding:12px;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--roxo)" id="mBandaMax"></div>
+          <div style="font-size:11px;color:var(--muted)">músicas/show</div>
+        </div>
+      </div>
+      <div class="secao-titulo">📅 Agenda da Semana</div>
+      <div id="mBandaAgenda"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Selecionar músicas -->
+<div class="overlay" id="overlayMusicas">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div>
+        <h2>🎵 Escolha as Músicas</h2>
+        <div style="font-size:13px;color:var(--muted)" id="mMusShowInfo"></div>
+      </div>
+      <button class="btn-sec" onclick="fecharModal('overlayMusicas')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:13px;color:var(--muted)">Selecionadas</span>
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--acento)" id="mMusCount">0</span>
+      </div>
+      <div id="mMusLista"></div>
+      <button class="btn-primario" onclick="irConfirmar()" style="margin-top:10px">Ver resumo →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Confirmar pedido -->
+<div class="overlay" id="overlayConfirm">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h2>✅ Confirmar Pedido</h2>
+      <button class="btn-sec" onclick="fecharModal('overlayConfirm')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-box" id="confirmDetalhes"></div>
+      <div class="valor-total" id="confirmValor"></div>
+      <div class="valor-label">valor total estimado</div>
+      <button class="btn-primario" onclick="confirmarPedido()">🎸 Confirmar e Enviar Pedido</button>
+      <button class="btn-sec" onclick="fecharModal('overlayConfirm')" style="width:100%;margin-top:10px;text-align:center;">Voltar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Agenda form (banda) -->
+<div class="overlay" id="overlayAgendaForm">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h2>📅 <span id="agendaFormTitulo">Novo Show</span></h2>
+      <button class="btn-sec" onclick="fecharModal('overlayAgendaForm')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="campo"><label>Data</label><input type="date" id="afData"></div>
+      <div class="campo"><label>Hora de início</label><input type="time" id="afHora"></div>
+      <div class="campo"><label>Local / Estabelecimento</label><input type="text" id="afLocal" placeholder="Ex: Bar do João"></div>
+      <div class="campo"><label>Cidade</label><input type="text" id="afCidade" placeholder="Ex: São Paulo"></div>
+      <button class="btn-primario" onclick="salvarAgenda()">Salvar show →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Música form (banda) -->
+<div class="overlay" id="overlayMusicaForm">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h2>🎵 <span id="musicaFormTitulo">Nova Música</span></h2>
+      <button class="btn-sec" onclick="fecharModal('overlayMusicaForm')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="campo"><label>Título</label><input type="text" id="mfTitulo" placeholder="Nome da música"></div>
+      <div class="campo"><label>Artista / Banda original</label><input type="text" id="mfArtista" placeholder="Ex: The Beatles"></div>
+      <div class="campo"><label>Gênero</label>
+        <select id="mfGenero">
+          <option>Rock</option><option>Pop</option><option>Sertanejo</option>
+          <option>Pagode</option><option>Forró</option><option>MPB</option>
+          <option>Blues</option><option>Jazz</option><option>Funk</option>
+          <option>Reggae</option><option>Metal</option><option>Outro</option>
+        </select>
+      </div>
+      <button class="btn-primario" onclick="salvarMusica()">Salvar música →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  CONFIGURAÇÃO SUPABASE
+// ═══════════════════════════════════════════════════════════════════
+const SB_URL = 'https://cpjkykbwfvmzvesuohwa.supabase.co';
+const SB_KEY = 'sb_publishable_fZsBiD71FZ1qxzrDAR41Yw_O4VCjw-9';
+
+const APP = {
+  token: null, userId: null, userEmail: null,
+  tipo: null,   // 'usuario' | 'banda'
+  perfil: null, // dados do profile
+  banda: null,  // dados da banda (se tipo=banda)
+  tipoLogin: 'usuario', // tipo selecionado na tela de login
+  // estado de pedido em andamento
+  agendaSel: null, musicasSel: [], bandaSel: null,
+};
+
+// ── Helpers HTTP ────────────────────────────────────────
+function h(extra={}){
+  return {'Content-Type':'application/json','apikey':SB_KEY,
+    'Authorization':'Bearer '+(APP.token||SB_KEY),...extra};
+}
+async function sbGet(path){
+  const r=await fetch(SB_URL+path,{headers:h({'Prefer':'return=representation'})});
+  if(!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function sbPost(path,body,extra={}){
+  const r=await fetch(SB_URL+path,{method:'POST',headers:h({...extra,'Prefer':'return=representation'}),body:JSON.stringify(body)});
+  if(!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function sbPatch(path,body){
+  const r=await fetch(SB_URL+path,{method:'PATCH',headers:h({'Prefer':'return=minimal'}),body:JSON.stringify(body)});
+  if(!r.ok) throw new Error(await r.text());
+}
+async function sbDelete(path){
+  const r=await fetch(SB_URL+path,{method:'DELETE',headers:h({'Prefer':'return=minimal'})});
+  if(!r.ok) throw new Error(await r.text());
+}
+
+// ── Toast ──────────────────────────────────────────────
+function toast(msg, tipo='ok'){
+  const d=document.createElement('div');
+  d.className=`toast ${tipo}`;
+  d.textContent=msg;
+  document.getElementById('toastArea').appendChild(d);
+  setTimeout(()=>d.remove(),3000);
+}
+
+// ── Modais ─────────────────────────────────────────────
+function abrirModal(id){document.getElementById(id).classList.add('vis');}
+function fecharModal(id){document.getElementById(id).classList.remove('vis');}
+
+// ═══════════════════════════════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════════════════════════════
+let TIPO_LOGIN = 'usuario';
+function setTipo(t){
+  TIPO_LOGIN=t;
+  document.querySelectorAll('.tipo-tab').forEach((b,i)=>b.classList.toggle('ativo',i===(t==='usuario'?0:1)));
+  document.getElementById('cadTipoLabel').textContent = t==='banda'?' / Nome da Banda':' ';
+}
+
+function showCadastro(){
+  document.getElementById('loginPanel').style.display='none';
+  document.getElementById('cadastroPanel').style.display='block';
+}
+function showLogin(){
+  document.getElementById('cadastroPanel').style.display='none';
+  document.getElementById('loginPanel').style.display='block';
+}
+
+async function fazerLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const senha=document.getElementById('loginSenha').value;
+  const err=document.getElementById('loginErro');
+  err.classList.remove('vis');
+  if(!email||!senha){err.textContent='Preencha e-mail e senha.';err.classList.add('vis');return;}
+  try{
+    const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{
+      method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},
+      body:JSON.stringify({email,password:senha})
+    });
+    const d=await r.json();
+    if(!r.ok){err.textContent=d.error_description||d.msg||'Erro ao entrar.';err.classList.add('vis');return;}
+    APP.token=d.access_token; APP.userId=d.user.id; APP.userEmail=email;
+    localStorage.setItem('am_sess',JSON.stringify({token:d.access_token,refresh:d.refresh_token,uid:d.user.id,email,exp:Date.now()+3500000}));
+    await carregarPerfil();
+  }catch(e){err.textContent='Erro de conexão.';err.classList.add('vis');}
+}
+
+async function fazerCadastro(){
+  const nome=document.getElementById('cadNome').value.trim();
+  const email=document.getElementById('cadEmail').value.trim();
+  const senha=document.getElementById('cadSenha').value;
+  const cidade=document.getElementById('cadCidade').value.trim();
+  const err=document.getElementById('cadErro');
+  err.classList.remove('vis');
+  if(!nome||!email||!senha){err.textContent='Preencha todos os campos.';err.classList.add('vis');return;}
+  if(senha.length<6){err.textContent='Senha mínimo 6 caracteres.';err.classList.add('vis');return;}
+  try{
+    // 1. Criar usuário
+    const r=await fetch(SB_URL+'/auth/v1/signup',{
+      method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},
+      body:JSON.stringify({email,password:senha})
+    });
+    const d=await r.json();
+    if(!r.ok){err.textContent=d.error_description||d.msg||'Erro ao criar conta.';err.classList.add('vis');return;}
+    APP.token=d.access_token; APP.userId=d.user.id; APP.userEmail=email;
+    localStorage.setItem('am_sess',JSON.stringify({token:d.access_token,refresh:d.refresh_token,uid:d.user.id,email,exp:Date.now()+3500000}));
+
+    // 2. Criar profile
+    await sbPost('/rest/v1/profiles',{user_id:APP.userId,tipo:TIPO_LOGIN,nome,cidade:cidade||null});
+
+    // 3. Se banda, criar registro de banda
+    if(TIPO_LOGIN==='banda'){
+      await sbPost('/rest/v1/bandas',{user_id:APP.userId,nome,cidade:cidade||null});
+    }
+    await carregarPerfil();
+  }catch(e){err.textContent='Erro: '+e.message;err.classList.add('vis');}
+}
+
+async function carregarPerfil(){
+  try{
+    const arr=await sbGet('/rest/v1/profiles?user_id=eq.'+APP.userId+'&select=*');
+    if(!arr.length){toast('Perfil não encontrado','err');return;}
+    APP.perfil=arr[0]; APP.tipo=arr[0].tipo;
+    if(APP.tipo==='banda'){
+      const b=await sbGet('/rest/v1/bandas?user_id=eq.'+APP.userId+'&select=*');
+      APP.banda=b[0]||null;
+    }
+    entrarNoApp();
+  }catch(e){toast('Erro ao carregar perfil','err');}
+}
+
+function logout(){
+  localStorage.removeItem('am_sess');
+  APP.token=APP.userId=APP.perfil=APP.banda=null;
+  document.getElementById('telaLogin').classList.add('ativa');
+  document.getElementById('telaApp').classList.remove('ativa');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  ENTRAR NO APP
+// ═══════════════════════════════════════════════════════════════════
+function entrarNoApp(){
+  document.getElementById('telaLogin').classList.remove('ativa');
+  document.getElementById('telaApp').classList.add('ativa');
+  document.getElementById('headerNome').textContent=APP.perfil.nome;
+  document.getElementById('headerTipo').textContent=APP.tipo==='banda'?'🎸 Banda':'🎤 Fã';
+  montarNav();
+  navegarPara(0);
+}
+
+function montarNav(){
+  const nav=document.getElementById('bottomNav');
+  const itens = APP.tipo==='banda'
+    ?[['🏠','Início',0],['📅','Agenda',1],['🎵','Músicas',2],['📋','Pedidos',3],['👤','Perfil',4]]
+    :[['🔍','Explorar',0],['📋','Meus Pedidos',1],['👤','Perfil',2]];
+  nav.innerHTML=itens.map(([ic,nm,idx])=>
+    `<button class="nav-item" onclick="navegarPara(${idx})">
+      <span class="nav-icon">${ic}</span>${nm}
+    </button>`).join('');
+}
+
+let abaPainel=0;
+function navegarPara(idx){
+  abaPainel=idx;
+  document.querySelectorAll('.nav-item').forEach((b,i)=>b.classList.toggle('ativo',i===idx));
+  if(APP.tipo==='banda') renderBanda(idx);
+  else renderUsuario(idx);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  RENDER USUÁRIO
+// ═══════════════════════════════════════════════════════════════════
+async function renderUsuario(idx){
+  const body=document.getElementById('appBody');
+  if(idx===0) await renderExplorar(body);
+  else if(idx===1) await renderMeusPedidos(body);
+  else renderPerfilUsuario(body);
+}
+
+async function renderExplorar(body){
+  body.innerHTML=`<div class="loading"><div class="spinner"></div>Buscando bandas...</div>`;
+  try{
+    const cidades=await sbGet('/rest/v1/bandas?select=cidade&order=cidade');
+    const unicas=[...new Set(cidades.map(b=>b.cidade).filter(Boolean))].sort();
+    const cidAtual=APP.perfil.cidade||'';
+    let html=`
+      <div class="filtro-bar">
+        <span class="icon">📍</span>
+        <select id="selectCidade" onchange="mudarCidade(this.value)">
+          <option value="">Todas as cidades</option>
+          ${unicas.map(c=>`<option value="${c}" ${c===cidAtual?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div class="secao-titulo">🎸 Bandas <span class="badge" id="badgeCount"></span></div>
+      <div class="banda-grid" id="bandaGrid"><div class="loading"><div class="spinner"></div></div></div>`;
+    body.innerHTML=html;
+    await carregarBandas(cidAtual);
+  }catch(e){body.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>${e.message}</p></div>`;}
+}
+
+async function carregarBandas(cidade){
+  const grid=document.getElementById('bandaGrid');
+  if(!grid) return;
+  let path='/rest/v1/bandas?select=*&order=nome';
+  if(cidade) path+=`&cidade=eq.${encodeURIComponent(cidade)}`;
+  try{
+    const bandas=await sbGet(path);
+    document.getElementById('badgeCount').textContent=bandas.length;
+    if(!bandas.length){grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">🎸</div><p>Nenhuma banda encontrada nesta cidade.</p></div>`;return;}
+    grid.innerHTML=bandas.map(b=>`
+      <div class="banda-card" onclick="verBanda(${b.id})">
+        <div class="banda-foto">${b.foto?`<img src="${b.foto}" alt="${b.nome}">`:'🎸'}</div>
+        <div class="banda-info">
+          <div class="banda-nome">${b.nome}</div>
+          <div class="banda-cidade">📍 ${b.cidade||'—'}</div>
+          <div class="banda-genero">R$ ${(b.valor_servico||0).toFixed(2)}/mús.</div>
+        </div>
+      </div>`).join('');
+  }catch(e){grid.innerHTML=`<div class="empty"><p>Erro: ${e.message}</p></div>`;}
+}
+
+async function mudarCidade(c){
+  APP.perfil.cidade=c;
+  try{await sbPatch('/rest/v1/profiles?user_id=eq.'+APP.userId,{cidade:c||null});}catch(e){}
+  await carregarBandas(c);
+}
+
+// ── Ver banda ──────────────────────────────────────────
+let _bandaAtual=null;
+async function verBanda(bandaId){
+  try{
+    const [b]=await sbGet('/rest/v1/bandas?id=eq.'+bandaId+'&select=*');
+    _bandaAtual=b;
+    document.getElementById('mBandaFoto').innerHTML=b.foto?`<img src="${b.foto}" alt="${b.nome}">`:'🎸';
+    document.getElementById('mBandaNome').textContent=b.nome;
+    document.getElementById('mBandaCidade').textContent='📍 '+(b.cidade||'—');
+    document.getElementById('mBandaBio').textContent=b.bio||'';
+    document.getElementById('mBandaValor').textContent='R$ '+(b.valor_servico||0).toFixed(2);
+    document.getElementById('mBandaMax').textContent=b.max_musicas_por_show||'∞';
+    abrirModal('overlayBanda');
+    // Carrega agenda da semana
+    const hoje=new Date().toISOString().split('T')[0];
+    const semFim=new Date(Date.now()+7*86400000).toISOString().split('T')[0];
+    const agenda=await sbGet(`/rest/v1/agenda?banda_id=eq.${bandaId}&data=gte.${hoje}&data=lte.${semFim}&ativa=eq.true&order=data,hora_inicio&select=*`);
+    const div=document.getElementById('mBandaAgenda');
+    if(!agenda.length){div.innerHTML=`<div class="empty"><div class="ei">📅</div><p>Sem shows nos próximos 7 dias.</p></div>`;return;}
+    // Para cada show, conta músicas já pedidas
+    div.innerHTML=await Promise.all(agenda.map(async ag=>{
+      const pedidos=await sbGet(`/rest/v1/pedido_musicas?select=id,pedidos!inner(agenda_id)&pedidos.agenda_id=eq.${ag.id}`).catch(()=>[]);
+      const usadas=pedidos.length;
+      const max=b.max_musicas_por_show||999;
+      const livres=Math.max(0,max-usadas);
+      const cheio=livres===0;
+      return `<div class="agenda-item ${cheio?'':'cursor'}" onclick="${cheio?'':'selecionarShow('+ag.id+')'}">
+        <div class="agenda-data">${formatarData(ag.data)}</div>
+        <div class="agenda-local">${ag.local}</div>
+        <div class="agenda-hora">⏰ ${ag.hora_inicio?.substring(0,5)||'—'} · 📍 ${ag.cidade||'—'}</div>
+        <div class="agenda-slots">
+          <span class="slot-badge ${cheio?'cheio':''}">${cheio?'Esgotado':'🎵 '+livres+' slots disponíveis'}</span>
+        </div>
+      </div>`;
+    })).then(r=>r.join(''));
+  }catch(e){toast('Erro ao carregar banda','err');}
+}
+
+async function selecionarShow(agendaId){
+  const ag=await sbGet('/rest/v1/agenda?id=eq.'+agendaId+'&select=*').then(r=>r[0]);
+  APP.agendaSel=ag; APP.musicasSel=[];
+  // Carrega músicas da banda
+  const musicas=await sbGet('/rest/v1/musicas?banda_id=eq.'+_bandaAtual.id+'&select=*&order=titulo');
+  const div=document.getElementById('mMusLista');
+  document.getElementById('mMusShowInfo').textContent=`${formatarData(ag.data)} · ${ag.hora_inicio?.substring(0,5)} · ${ag.local}`;
+  const max=_bandaAtual.max_musicas_por_show||999;
+  APP.bandaSel=_bandaAtual;
+  if(!musicas.length){div.innerHTML=`<div class="empty"><div class="ei">🎵</div><p>Esta banda ainda não cadastrou músicas.</p></div>`;return;}
+  div.innerHTML=musicas.map(m=>`
+    <div class="musica-item" id="mi${m.id}" onclick="toggleMusica(${m.id},'${esc(m.titulo)}','${esc(m.artista||'')}')">
+      <div class="musica-check" id="mc${m.id}"></div>
+      <div>
+        <div class="musica-titulo">${m.titulo}</div>
+        <div class="musica-artista">${m.artista||''}</div>
+        <div class="musica-genero">${m.genero||''}</div>
+      </div>
+    </div>`).join('');
+  atualizarContMusicas();
+  fecharModal('overlayBanda');
+  abrirModal('overlayMusicas');
+}
+
+function toggleMusica(id,titulo,artista){
+  const max=APP.bandaSel?.max_musicas_por_show||999;
+  const idx=APP.musicasSel.findIndex(m=>m.id===id);
+  if(idx>=0){
+    APP.musicasSel.splice(idx,1);
+  } else {
+    if(APP.musicasSel.length>=max){toast(`Limite de ${max} músicas por show!`,'err');return;}
+    APP.musicasSel.push({id,titulo,artista});
+  }
+  const sel=APP.musicasSel.some(m=>m.id===id);
+  document.getElementById('mi'+id)?.classList.toggle('sel',sel);
+  const mc=document.getElementById('mc'+id);
+  if(mc){mc.classList.toggle('ok',sel);}
+  atualizarContMusicas();
+}
+
+function atualizarContMusicas(){
+  document.getElementById('mMusCount').textContent=APP.musicasSel.length;
+}
+
+function irConfirmar(){
+  if(!APP.musicasSel.length){toast('Selecione ao menos uma música','err');return;}
+  const ag=APP.agendaSel; const b=APP.bandaSel;
+  const total=(b.valor_servico||0)*APP.musicasSel.length;
+  document.getElementById('confirmDetalhes').innerHTML=`
+    <div class="confirm-row"><span class="confirm-label">Banda</span><span class="confirm-val">${b.nome}</span></div>
+    <div class="confirm-row"><span class="confirm-label">Show</span><span class="confirm-val">${formatarData(ag.data)} ${ag.hora_inicio?.substring(0,5)}</span></div>
+    <div class="confirm-row"><span class="confirm-label">Local</span><span class="confirm-val">${ag.local}</span></div>
+    <div class="confirm-row"><span class="confirm-label">Músicas</span><span class="confirm-val">${APP.musicasSel.length}</span></div>
+    <div style="margin-top:10px">${APP.musicasSel.map(m=>`<div style="padding:6px 0;font-size:13px;border-bottom:1px solid var(--borda)">🎵 ${m.titulo}</div>`).join('')}</div>`;
+  document.getElementById('confirmValor').textContent='R$ '+total.toFixed(2);
+  fecharModal('overlayMusicas');
+  abrirModal('overlayConfirm');
+}
+
+async function confirmarPedido(){
+  try{
+    // Cria pedido
+    const [pedido]=await sbPost('/rest/v1/pedidos',{
+      agenda_id:APP.agendaSel.id, banda_id:APP.bandaSel.id,
+      usuario_id:APP.userId, status:'pendente'
+    });
+    // Cria pedido_musicas
+    for(const m of APP.musicasSel){
+      await sbPost('/rest/v1/pedido_musicas',{pedido_id:pedido.id,musica_id:m.id,status:'pendente'});
+    }
+    fecharModal('overlayConfirm');
+    APP.musicasSel=[]; APP.agendaSel=null; APP.bandaSel=null;
+    toast('🎸 Pedido enviado com sucesso!');
+    navegarPara(1);
+  }catch(e){toast('Erro ao enviar pedido: '+e.message,'err');}
+}
+
+async function renderMeusPedidos(body){
+  body.innerHTML=`<div class="loading"><div class="spinner"></div></div>`;
+  try{
+    const pedidos=await sbGet(`/rest/v1/pedidos?usuario_id=eq.${APP.userId}&order=criado_em.desc&select=*,bandas(nome),agenda(data,hora_inicio,local),pedido_musicas(status,musicas(titulo,artista))`);
+    if(!pedidos.length){body.innerHTML=`<div class="empty"><div class="ei">🎵</div><p>Você ainda não fez pedidos.</p></div>`;return;}
+    body.innerHTML=`<div class="secao-titulo">📋 Meus Pedidos</div>`+pedidos.map(p=>`
+      <div class="meu-pedido-card">
+        <div class="meu-pedido-banda">🎸 ${p.bandas?.nome||'—'}</div>
+        <div class="meu-pedido-show">${formatarData(p.agenda?.data)} · ${p.agenda?.hora_inicio?.substring(0,5)} · ${p.agenda?.local||''}</div>
+        <div class="pedido-musicas-lista">
+          ${(p.pedido_musicas||[]).map(pm=>`
+            <div class="meu-musica-row">
+              <span>🎵 ${pm.musicas?.titulo||'—'} <small style="color:var(--muted)">${pm.musicas?.artista||''}</small></span>
+              <span class="status-badge status-${pm.status}">${pm.status==='tocada'?'✅ Tocada':pm.status==='pendente'?'⏳ Aguardando':'❌'}</span>
+            </div>`).join('')}
+        </div>
+      </div>`).join('');
+  }catch(e){body.innerHTML=`<div class="empty"><p>Erro: ${e.message}</p></div>`;}
+}
+
+function renderPerfilUsuario(body){
+  const p=APP.perfil;
+  body.innerHTML=`
+    <div class="secao-titulo">👤 Meu Perfil</div>
+    <div class="form-card">
+      <div class="campo"><label>Nome</label><input type="text" id="upNome" value="${esc(p.nome||'')}"></div>
+      <div class="campo"><label>Cidade</label><input type="text" id="upCidade" value="${esc(p.cidade||'')}"></div>
+      <button class="btn-primario" onclick="salvarPerfilUsuario()">Salvar →</button>
+    </div>`;
+}
+
+async function salvarPerfilUsuario(){
+  const nome=document.getElementById('upNome').value.trim();
+  const cidade=document.getElementById('upCidade').value.trim();
+  try{
+    await sbPatch('/rest/v1/profiles?user_id=eq.'+APP.userId,{nome,cidade:cidade||null});
+    APP.perfil.nome=nome; APP.perfil.cidade=cidade;
+    document.getElementById('headerNome').textContent=nome;
+    toast('Perfil atualizado!');
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  RENDER BANDA
+// ═══════════════════════════════════════════════════════════════════
+async function renderBanda(idx){
+  const body=document.getElementById('appBody');
+  if(idx===0) await renderBandaInicio(body);
+  else if(idx===1) await renderBandaAgenda(body);
+  else if(idx===2) await renderBandaMusicas(body);
+  else if(idx===3) await renderBandaPedidos(body);
+  else renderBandaPerfil(body);
+}
+
+async function renderBandaInicio(body){
+  const b=APP.banda;
+  if(!b){body.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>Perfil de banda não encontrado.</p></div>`;return;}
+  try{
+    const totalMusicas=await sbGet('/rest/v1/musicas?banda_id=eq.'+b.id+'&select=id').then(r=>r.length);
+    const totalShows=await sbGet('/rest/v1/agenda?banda_id=eq.'+b.id+'&ativa=eq.true&select=id').then(r=>r.length);
+    const totalPedidos=await sbGet('/rest/v1/pedidos?banda_id=eq.'+b.id+'&status=eq.pendente&select=id').then(r=>r.length);
+    body.innerHTML=`
+      <div class="secao-titulo">🎸 Olá, ${b.nome}!</div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="stat-num">${totalMusicas}</div><div class="stat-label">Músicas</div></div>
+        <div class="stat-box"><div class="stat-num">${totalShows}</div><div class="stat-label">Shows</div></div>
+        <div class="stat-box"><div class="stat-num">${totalPedidos}</div><div class="stat-label">Pedidos</div></div>
+      </div>
+      <div class="form-card" style="text-align:center">
+        <div style="font-size:48px;margin-bottom:10px">${b.foto?`<img src="${b.foto}" style="width:80px;height:80px;border-radius:16px;object-fit:cover">`:' 🎸'}</div>
+        <div style="font-size:18px;font-weight:700">${b.nome}</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px">📍 ${b.cidade||'—'}</div>
+        <div style="margin-top:10px;font-size:13px;color:var(--muted)">R$ ${(b.valor_servico||0).toFixed(2)}/música · máx ${b.max_musicas_por_show||'∞'} por show</div>
+      </div>`;
+  }catch(e){body.innerHTML=`<div class="empty"><p>Erro: ${e.message}</p></div>`;}
+}
+
+async function renderBandaAgenda(body){
+  body.innerHTML=`<div class="loading"><div class="spinner"></div></div>`;
+  try{
+    const agenda=await sbGet('/rest/v1/agenda?banda_id=eq.'+APP.banda.id+'&order=data.desc,hora_inicio.desc&select=*');
+    body.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="secao-titulo" style="margin:0">📅 Agenda</div>
+        <button class="btn-sec" onclick="abrirModalAgenda()">+ Novo show</button>
+      </div>
+      ${!agenda.length?`<div class="empty"><div class="ei">📅</div><p>Nenhum show cadastrado.</p></div>`:
+        agenda.map(ag=>`
+          <div class="agenda-list-item">
+            <div class="agenda-list-header">
+              <div>
+                <div class="agenda-data">${formatarData(ag.data)}</div>
+                <div class="agenda-local" style="margin-top:4px">${ag.local}</div>
+                <div class="agenda-hora">⏰ ${ag.hora_inicio?.substring(0,5)} · 📍 ${ag.cidade||'—'}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+                <span class="status-badge ${ag.ativa?'status-pendente':'status-cancelada'}">${ag.ativa?'Ativo':'Inativo'}</span>
+                <button class="btn-del" onclick="toggleAgenda(${ag.id},${ag.ativa})">
+                  ${ag.ativa?'⏸':'▶'}
+                </button>
+              </div>
+            </div>
+          </div>`).join('')}`;
+  }catch(e){body.innerHTML=`<div class="empty"><p>Erro: ${e.message}</p></div>`;}
+}
+
+function abrirModalAgenda(){
+  document.getElementById('afData').value='';
+  document.getElementById('afHora').value='';
+  document.getElementById('afLocal').value='';
+  document.getElementById('afCidade').value=APP.banda?.cidade||'';
+  document.getElementById('agendaFormTitulo').textContent='Novo Show';
+  abrirModal('overlayAgendaForm');
+}
+
+async function salvarAgenda(){
+  const data=document.getElementById('afData').value;
+  const hora=document.getElementById('afHora').value;
+  const local=document.getElementById('afLocal').value.trim();
+  const cidade=document.getElementById('afCidade').value.trim();
+  if(!data||!hora||!local){toast('Preencha todos os campos','err');return;}
+  try{
+    await sbPost('/rest/v1/agenda',{banda_id:APP.banda.id,data,hora_inicio:hora,local,cidade:cidade||APP.banda.cidade||null,ativa:true});
+    fecharModal('overlayAgendaForm');
+    toast('Show adicionado!');
+    await renderBandaAgenda(document.getElementById('appBody'));
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+
+async function toggleAgenda(id,ativo){
+  try{
+    await sbPatch('/rest/v1/agenda?id=eq.'+id,{ativa:!ativo});
+    toast(ativo?'Show desativado':'Show ativado!');
+    await renderBandaAgenda(document.getElementById('appBody'));
+  }catch(e){toast('Erro','err');}
+}
+
+async function renderBandaMusicas(body){
+  body.innerHTML=`<div class="loading"><div class="spinner"></div></div>`;
+  try{
+    const musicas=await sbGet('/rest/v1/musicas?banda_id=eq.'+APP.banda.id+'&select=*&order=titulo');
+    body.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="secao-titulo" style="margin:0">🎵 Músicas</div>
+        <button class="btn-sec" onclick="abrirModalMusica()">+ Adicionar</button>
+      </div>
+      ${!musicas.length?`<div class="empty"><div class="ei">🎵</div><p>Nenhuma música cadastrada.</p></div>`:
+        musicas.map(m=>`
+          <div class="musica-list-item">
+            <div class="musica-list-info">
+              <div class="musica-titulo">${m.titulo}</div>
+              <div class="musica-artista">${m.artista||''}</div>
+              <div class="musica-genero">${m.genero||''}</div>
+            </div>
+            <button class="btn-del" onclick="deletarMusica(${m.id})">🗑</button>
+          </div>`).join('')}`;
+  }catch(e){body.innerHTML=`<div class="empty"><p>Erro: ${e.message}</p></div>`;}
+}
+
+function abrirModalMusica(){
+  document.getElementById('mfTitulo').value='';
+  document.getElementById('mfArtista').value='';
+  document.getElementById('musicaFormTitulo').textContent='Nova Música';
+  abrirModal('overlayMusicaForm');
+}
+
+async function salvarMusica(){
+  const titulo=document.getElementById('mfTitulo').value.trim();
+  const artista=document.getElementById('mfArtista').value.trim();
+  const genero=document.getElementById('mfGenero').value;
+  if(!titulo){toast('Informe o título','err');return;}
+  try{
+    await sbPost('/rest/v1/musicas',{banda_id:APP.banda.id,titulo,artista:artista||null,genero});
+    fecharModal('overlayMusicaForm');
+    toast('Música adicionada!');
+    await renderBandaMusicas(document.getElementById('appBody'));
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+
+async function deletarMusica(id){
+  if(!confirm('Remover esta música?')) return;
+  try{
+    await sbDelete('/rest/v1/musicas?id=eq.'+id);
+    toast('Música removida');
+    await renderBandaMusicas(document.getElementById('appBody'));
+  }catch(e){toast('Erro','err');}
+}
+
+async function renderBandaPedidos(body){
+  body.innerHTML=`<div class="loading"><div class="spinner"></div></div>`;
+  try{
+    // Busca agenda da banda
+    const agenda=await sbGet('/rest/v1/agenda?banda_id=eq.'+APP.banda.id+'&order=data.desc&select=*');
+    if(!agenda.length){body.innerHTML=`<div class="empty"><div class="ei">📋</div><p>Sem shows cadastrados.</p></div>`;return;}
+
+    // Monta selector de show
+    let html=`
+      <div class="secao-titulo">📋 Pedidos por Show</div>
+      <div class="campo"><label>Selecione o show</label>
+        <select id="showSelector" onchange="carregarPedidosShow(this.value)">
+          <option value="">— escolha um show —</option>
+          ${agenda.map(ag=>`<option value="${ag.id}">${formatarData(ag.data)} · ${ag.hora_inicio?.substring(0,5)} · ${ag.local}</option>`).join('')}
+        </select>
+      </div>
+      <div id="pedidosLista"></div>`;
+    body.innerHTML=html;
+  }catch(e){body.innerHTML=`<div class="empty"><p>Erro: ${e.message}</p></div>`;}
+}
+
+async function carregarPedidosShow(agendaId){
+  const div=document.getElementById('pedidosLista');
+  if(!agendaId){div.innerHTML='';return;}
+  div.innerHTML=`<div class="loading"><div class="spinner"></div></div>`;
+  try{
+    const pedidos=await sbGet(`/rest/v1/pedidos?agenda_id=eq.${agendaId}&order=criado_em&select=*,profiles(nome),pedido_musicas(id,status,musicas(titulo,artista))`);
+    if(!pedidos.length){div.innerHTML=`<div class="empty"><div class="ei">🎵</div><p>Nenhum pedido para este show.</p></div>`;return;}
+    div.innerHTML=pedidos.map(p=>`
+      <div class="pedido-card" id="pc${p.id}">
+        <div class="pedido-header">
+          <span class="pedido-usuario">👤 ${p.profiles?.nome||'Fã'}</span>
+          <span class="pedido-hora">${formatarHora(p.criado_em)}</span>
+        </div>
+        <div class="pedido-musicas-lista">
+          ${(p.pedido_musicas||[]).map(pm=>`
+            <div class="pedido-musica-row" id="pmr${pm.id}">
+              <span style="flex:1;font-size:14px">🎵 ${pm.musicas?.titulo||'—'} <small style="color:var(--muted)">${pm.musicas?.artista||''}</small></span>
+              <span class="status-badge status-${pm.status}" id="pmst${pm.id}">${pm.status==='tocada'?'✅ Tocada':'⏳'}</span>
+              ${pm.status!=='tocada'?`<button class="btn-tocar" onclick="tocarMusica(${pm.id})">Tocar</button>`:''}
+            </div>`).join('')}
+        </div>
+      </div>`).join('');
+  }catch(e){div.innerHTML=`<div class="empty"><p>Erro: ${e.message}</p></div>`;}
+}
+
+async function tocarMusica(pedidoMusicaId){
+  try{
+    await sbPatch('/rest/v1/pedido_musicas?id=eq.'+pedidoMusicaId,{status:'tocada'});
+    const el=document.getElementById('pmst'+pedidoMusicaId);
+    if(el){el.textContent='✅ Tocada';el.className='status-badge status-tocada';}
+    const row=document.getElementById('pmr'+pedidoMusicaId);
+    if(row){const btn=row.querySelector('.btn-tocar');if(btn)btn.remove();}
+    toast('🎸 Música marcada como tocada!');
+  }catch(e){toast('Erro','err');}
+}
+
+async function renderBandaPerfil(body){
+  const b=APP.banda||{};
+  body.innerHTML=`
+    <div class="secao-titulo">👤 Perfil da Banda</div>
+    <div class="form-card">
+      <h3>Foto</h3>
+      <div class="foto-upload-area" onclick="document.getElementById('fotoInput').click()">
+        ${b.foto?`<img class="foto-preview" src="${b.foto}" style="display:block;width:100%;max-height:200px;object-fit:cover;border-radius:10px;margin-bottom:8px">`:''}
+        <div style="font-size:13px;color:var(--muted)">📸 Clique para ${b.foto?'trocar':'adicionar'} foto</div>
+      </div>
+      <input type="file" id="fotoInput" accept="image/*" style="display:none" onchange="processarFoto(this)">
+    </div>
+    <div class="form-card">
+      <h3>Dados da Banda</h3>
+      <div class="campo"><label>Nome</label><input type="text" id="bpNome" value="${esc(b.nome||'')}"></div>
+      <div class="campo"><label>Cidade</label><input type="text" id="bpCidade" value="${esc(b.cidade||'')}"></div>
+      <div class="campo"><label>Bio / Descrição</label><textarea id="bpBio">${esc(b.bio||'')}</textarea></div>
+      <div class="campo"><label>WhatsApp (com DDD)</label><input type="text" id="bpWhats" value="${esc(b.whatsapp||'')}" placeholder="11999999999"></div>
+    </div>
+    <div class="form-card">
+      <h3>Valores e Limites</h3>
+      <div class="campo"><label>Valor por música (R$)</label><input type="number" id="bpValor" value="${b.valor_servico||0}" min="0" step="0.01"></div>
+      <div class="campo"><label>Máx. músicas pedidas por show</label><input type="number" id="bpMax" value="${b.max_musicas_por_show||10}" min="1" max="999"></div>
+    </div>
+    <button class="btn-primario" onclick="salvarPerfilBanda()">Salvar perfil →</button>`;
+}
+
+async function processarFoto(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const b64=e.target.result;
+    // Comprime para 600px
+    const img=new Image();
+    img.onload=async ()=>{
+      const c=document.createElement('canvas');
+      const MAX=600; let w=img.width,h=img.height;
+      if(w>MAX){h=h*MAX/w;w=MAX;}
+      c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      const fotoData=c.toDataURL('image/jpeg',0.8);
+      // Salva no perfil
+      try{
+        await sbPatch('/rest/v1/bandas?id=eq.'+APP.banda.id,{foto:fotoData});
+        APP.banda.foto=fotoData;
+        toast('Foto atualizada!');
+        renderBandaPerfil(document.getElementById('appBody'));
+      }catch(err){toast('Erro ao salvar foto','err');}
+    };
+    img.src=b64;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function salvarPerfilBanda(){
+  const nome=document.getElementById('bpNome').value.trim();
+  const cidade=document.getElementById('bpCidade').value.trim();
+  const bio=document.getElementById('bpBio').value.trim();
+  const whatsapp=document.getElementById('bpWhats').value.trim();
+  const valor=parseFloat(document.getElementById('bpValor').value)||0;
+  const max=parseInt(document.getElementById('bpMax').value)||10;
+  if(!nome){toast('Informe o nome da banda','err');return;}
+  try{
+    await sbPatch('/rest/v1/bandas?id=eq.'+APP.banda.id,{nome,cidade:cidade||null,bio:bio||null,whatsapp:whatsapp||null,valor_servico:valor,max_musicas_por_show:max});
+    await sbPatch('/rest/v1/profiles?user_id=eq.'+APP.userId,{nome,cidade:cidade||null});
+    APP.banda={...APP.banda,nome,cidade,bio,whatsapp,valor_servico:valor,max_musicas_por_show:max};
+    APP.perfil.nome=nome;
+    document.getElementById('headerNome').textContent=nome;
+    toast('Perfil atualizado!');
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  UTILITÁRIOS
+// ═══════════════════════════════════════════════════════════════════
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function formatarData(d){
+  if(!d) return '—';
+  const [y,m,dd]=d.split('-');
+  const meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const dias=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const dt=new Date(y,m-1,dd);
+  return `${dias[dt.getDay()]}, ${dd} ${meses[m-1]}`;
+}
+
+function formatarHora(iso){
+  if(!iso) return '';
+  return new Date(iso).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  INICIALIZAÇÃO
+// ═══════════════════════════════════════════════════════════════════
+async function iniciar(){
+  const sess=JSON.parse(localStorage.getItem('am_sess')||'null');
+  if(sess?.token && sess?.exp > Date.now()){
+    APP.token=sess.token; APP.userId=sess.uid; APP.userEmail=sess.email;
+    try{await carregarPerfil();}catch(e){logout();}
+  }
+}
+
+window.onload=iniciar;
+</script>
+
+<!-- ═══════════════════════════════ SQL SETUP ═══════════════════════════════ -->
+<!--
+Execute no Supabase SQL Editor:
+
+-- 1. Profiles
+CREATE TABLE IF NOT EXISTS profiles (
+  id bigserial PRIMARY KEY,
+  user_id uuid REFERENCES auth.users NOT NULL UNIQUE,
+  tipo text NOT NULL CHECK (tipo IN ('usuario','banda')),
+  nome text NOT NULL,
+  cidade text,
+  criado_em timestamptz DEFAULT now()
+);
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "select profiles" ON profiles FOR SELECT USING (true);
+CREATE POLICY "insert profiles" ON profiles FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "update profiles" ON profiles FOR UPDATE USING (auth.uid() = user_id);
+
+-- 2. Bandas
+CREATE TABLE IF NOT EXISTS bandas (
+  id bigserial PRIMARY KEY,
+  user_id uuid REFERENCES auth.users NOT NULL UNIQUE,
+  nome text NOT NULL,
+  foto text,
+  bio text,
+  cidade text,
+  whatsapp text,
+  valor_servico numeric DEFAULT 0,
+  max_musicas_por_show integer DEFAULT 10,
+  criado_em timestamptz DEFAULT now()
+);
+ALTER TABLE bandas ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "select bandas" ON bandas FOR SELECT USING (true);
+CREATE POLICY "insert bandas" ON bandas FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "update bandas" ON bandas FOR UPDATE USING (auth.uid() = user_id);
+
+-- 3. Músicas
+CREATE TABLE IF NOT EXISTS musicas (
+  id bigserial PRIMARY KEY,
+  banda_id bigint REFERENCES bandas NOT NULL,
+  titulo text NOT NULL,
+  artista text,
+  genero text,
+  criado_em timestamptz DEFAULT now()
+);
+ALTER TABLE musicas ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "select musicas" ON musicas FOR SELECT USING (true);
+CREATE POLICY "insert musicas" ON musicas FOR INSERT WITH CHECK (
+  EXISTS (SELECT 1 FROM bandas WHERE id = banda_id AND user_id = auth.uid())
+);
+CREATE POLICY "delete musicas" ON musicas FOR DELETE USING (
+  EXISTS (SELECT 1 FROM bandas WHERE id = banda_id AND user_id = auth.uid())
+);
+
+-- 4. Agenda
+CREATE TABLE IF NOT EXISTS agenda (
+  id bigserial PRIMARY KEY,
+  banda_id bigint REFERENCES bandas NOT NULL,
+  data date NOT NULL,
+  hora_inicio time,
+  local text,
+  cidade text,
+  ativa boolean DEFAULT true,
+  criado_em timestamptz DEFAULT now()
+);
+ALTER TABLE agenda ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "select agenda" ON agenda FOR SELECT USING (true);
+CREATE POLICY "insert agenda" ON agenda FOR INSERT WITH CHECK (
+  EXISTS (SELECT 1 FROM bandas WHERE id = banda_id AND user_id = auth.uid())
+);
+CREATE POLICY "update agenda" ON agenda FOR UPDATE USING (
+  EXISTS (SELECT 1 FROM bandas WHERE id = banda_id AND user_id = auth.uid())
+);
+
+-- 5. Pedidos
+CREATE TABLE IF NOT EXISTS pedidos (
+  id bigserial PRIMARY KEY,
+  agenda_id bigint REFERENCES agenda NOT NULL,
+  banda_id bigint REFERENCES bandas NOT NULL,
+  usuario_id uuid REFERENCES auth.users NOT NULL,
+  status text DEFAULT 'pendente' CHECK (status IN ('pendente','tocada','cancelada')),
+  criado_em timestamptz DEFAULT now()
+);
+ALTER TABLE pedidos ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "select pedidos banda" ON pedidos FOR SELECT USING (
+  EXISTS (SELECT 1 FROM bandas WHERE id = banda_id AND user_id = auth.uid())
+  OR auth.uid() = usuario_id
+);
+CREATE POLICY "insert pedidos" ON pedidos FOR INSERT WITH CHECK (auth.uid() = usuario_id);
+CREATE POLICY "update pedidos banda" ON pedidos FOR UPDATE USING (
+  EXISTS (SELECT 1 FROM bandas WHERE id = banda_id AND user_id = auth.uid())
+);
+
+-- 6. Pedido Músicas
+CREATE TABLE IF NOT EXISTS pedido_musicas (
+  id bigserial PRIMARY KEY,
+  pedido_id bigint REFERENCES pedidos NOT NULL,
+  musica_id bigint REFERENCES musicas NOT NULL,
+  status text DEFAULT 'pendente' CHECK (status IN ('pendente','tocada')),
+  criado_em timestamptz DEFAULT now()
+);
+ALTER TABLE pedido_musicas ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "select pm" ON pedido_musicas FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM pedidos p JOIN bandas b ON b.id = p.banda_id
+    WHERE p.id = pedido_id AND (b.user_id = auth.uid() OR p.usuario_id = auth.uid())
+  )
+);
+CREATE POLICY "insert pm" ON pedido_musicas FOR INSERT WITH CHECK (
+  EXISTS (SELECT 1 FROM pedidos WHERE id = pedido_id AND usuario_id = auth.uid())
+);
+CREATE POLICY "update pm" ON pedido_musicas FOR UPDATE USING (
+  EXISTS (
+    SELECT 1 FROM pedidos p JOIN bandas b ON b.id = p.banda_id
+    WHERE p.id = pedido_id AND b.user_id = auth.uid()
+  )
+);
+-->
+</body>
+</html>
